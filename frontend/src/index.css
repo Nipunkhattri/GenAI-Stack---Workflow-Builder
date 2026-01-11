@@ -1,0 +1,83 @@
+@import 'tailwindcss';
+
+@layer base {
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+@layer components {
+
+  /* Remove default ReactFlow node background */
+  .react-flow__node {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  /* React Flow edge styling */
+  .react-flow__edge-path {
+    stroke: #94a3b8;
+    stroke-width: 2;
+  }
+
+  .react-flow__connection-line {
+    stroke: #22c55e;
+    stroke-width: 2;
+  }
+
+  /* Handle styling - connection points */
+  .react-flow__handle {
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    border: none !important;
+  }
+
+  /* Ensure edges connect at center of handle */
+  .react-flow__handle.source,
+  .react-flow__handle.target {
+    background: transparent;
+  }
+
+  /* Override ReactFlow Controls to be horizontal at bottom */
+  .react-flow__controls {
+    display: flex !important;
+    flex-direction: row !important;
+    position: absolute !important;
+    bottom: 20px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    top: auto !important;
+    right: auto !important;
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    padding: 6px !important;
+    gap: 4px !important;
+  }
+
+  .react-flow__controls button {
+    width: 36px !important;
+    height: 36px !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    color: #4b5563 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .react-flow__controls button:hover {
+    background: #f3f4f6 !important;
+    color: #111827 !important;
+  }
+
+  .react-flow__controls button svg {
+    fill: currentColor !important;
+  }
+}
