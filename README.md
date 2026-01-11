@@ -41,17 +41,21 @@ The easiest way to run the application is using Docker Compose.
 2.  **Environment Setup**:
     Create a `.env` file in the `backend/` directory (or root, depending on your setup) based on `.env.example`.
     
-    Optional Configuration (Keys can also be entered in the UI):
+    Required Configuration (Must be set in .env):
     ```env
-    # Leave empty to input via frontend UI
-    OPENAI_API_KEY=
-    SERPAPI_API_KEY=
-    PINECONE_API_KEY=
+    # Vector Database (Pinecone)
+    PINECONE_API_KEY=...
+    PINECONE_ENVIRONMENT=gcp-starter
     
     # Database Configuration
-    PINECONE_ENVIRONMENT=gcp-starter
     DATABASE_URL=postgresql://postgres:postgres@postgres:5432/workflow_db
     DATABASE_SSL=false
+    ```
+
+    (Will be entered in UI):
+    ```env
+    OPENAI_API_KEY=
+    SERPAPI_API_KEY=
     ```
 
 3.  **Run with Docker Compose**:
@@ -89,10 +93,13 @@ If you prefer running locally without Docker:
     DATABASE_URL=postgresql://postgres:postgres@localhost:5432/Workflow_db
     DATABASE_SSL=false
     
-    # API Keys (Optional - Can be entered in UI)
+    # Vector Database (Required)
+    PINECONE_API_KEY=...
+    PINECONE_ENVIRONMENT=gcp-starter
+    
+    # API Keys (Will be entered in UI)
     OPENAI_API_KEY=
     SERPAPI_API_KEY=
-    PINECONE_API_KEY=
     ```
 5.  Run server:
     ```bash
