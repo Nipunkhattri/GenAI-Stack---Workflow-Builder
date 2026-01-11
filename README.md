@@ -34,18 +34,21 @@ The easiest way to run the application is using Docker Compose.
 
 1.  **Clone the repository**:
     ```bash
-    git clone <repository-url>
-    cd <repository-folder>
+    git clone https://github.com/Nipunkhattri/GenAI-Stack---Workflow-Builder
+    cd GenAI-Stack---Workflow-Builder
     ```
 
 2.  **Environment Setup**:
     Create a `.env` file in the `backend/` directory (or root, depending on your setup) based on `.env.example`.
     
-    Required keys:
+    Optional Configuration (Keys can also be entered in the UI):
     ```env
-    OPENAI_API_KEY=sk-...
-    SERPAPI_API_KEY=...
-    PINECONE_API_KEY=...
+    # Leave empty to input via frontend UI
+    OPENAI_API_KEY=
+    SERPAPI_API_KEY=
+    PINECONE_API_KEY=
+    
+    # Database Configuration
     PINECONE_ENVIRONMENT=gcp-starter
     DATABASE_URL=postgresql://postgres:postgres@postgres:5432/workflow_db
     DATABASE_SSL=false
@@ -86,10 +89,10 @@ If you prefer running locally without Docker:
     DATABASE_URL=postgresql://postgres:postgres@localhost:5432/Workflow_db
     DATABASE_SSL=false
     
-    # API Keys
-    OPENAI_API_KEY=sk-...
-    SERPAPI_API_KEY=...
-    PINECONE_API_KEY=...
+    # API Keys (Optional - Can be entered in UI)
+    OPENAI_API_KEY=
+    SERPAPI_API_KEY=
+    PINECONE_API_KEY=
     ```
 5.  Run server:
     ```bash
@@ -122,15 +125,15 @@ If you prefer running locally without Docker:
 
 ```mermaid
 graph TD
-    subgraph Frontend [Frontend (React + Vite)]
+    subgraph Frontend ["Frontend (React + Vite)"]
         UI[User Interface]
         RF[React Flow Canvas]
         Redux[State Management]
     end
 
-    subgraph Backend [Backend (FastAPI)]
+    subgraph Backend ["Backend (FastAPI)"]
         API[API Routes]
-        WE[Workflow Engine (LangGraph)]
+        WE["Workflow Engine (LangGraph)"]
         LE[LLM Service]
         VS[Vector Service]
     end
@@ -146,7 +149,7 @@ graph TD
     API --> WE
     WE --> LE
     WE --> VS
-    LE --> OpenAI[OpenAI / Gemini]
+    LE --> OpenAI["OpenAI / Gemini"]
     VS --> PC
     API --> PG
 ```
