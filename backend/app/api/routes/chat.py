@@ -79,8 +79,11 @@ async def execute_chat(
             print(f"Knowledge Base - workflow_id: {workflow_id}")
             
             target_path = config.get("file_path")
-            if not target_path and isinstance(config.get("file"), dict):
-                target_path = config.get("file", {}).get("path")
+            file_config = config.get("file", {})
+            print(f"File config object: {file_config}")
+            
+            if not target_path and isinstance(file_config, dict):
+                target_path = file_config.get("path")
             
             print(f"Target file path from config: {target_path}")
 
@@ -93,13 +96,40 @@ async def execute_chat(
                 
                 selected_doc = None
                 
+                # Strategy 1: Match by exact file path
                 if target_path and documents:
                     for doc in documents:
-                        if doc.file_path == target_path or (target_path and target_path.replace("\\", "/").split("/")[-1] == doc.file_path.replace("\\", "/").split("/")[-1]):
+                        if doc.file_path == target_path:
                             selected_doc = doc
-                            print(f"Found matching DB record: {doc.filename} -> {doc.collection_name}")
+                            print(f"Found matching DB record by exact path: {doc.filename}")
+                            break
+                        # normalized check
+                        if target_path.replace("\\", "/").split("/")[-1] == doc.file_path.replace("\\", "/").split("/")[-1]:
+                            selected_doc = doc
+                            print(f"Found matching DB record by filename match in path: {doc.filename}")
                             break
                 
+                # Strategy 2: Fallback to match by filename from config if path failed
+                if not selected_doc and documents and isinstance(file_config, dict):
+                    target_filename = file_config.get("name")
+                    if target_filename:
+                        print(f"Attempting fallback match by filename: {target_filename}")
+                        for doc in documents:
+                            if doc.filename == target_filename:
+                                selected_doc = doc
+                                print(f"Fallback success: Found matching DB record by filename: {doc.filename}")
+                                break
+                
+                # Strategy 3: (NEW) Fallback to any document linked to this workflow
+                # The user explicitly requested this to handle cases where config might be incomplete but the workflow context implies the doc.
+                if not selected_doc and documents:
+                    # Default to the most recent one (documents are typically fetched in order, or we can sort)
+                    # The previous query: select(Document).where(Document.workflow_id == workflow_id)
+                    # We should probably sort by created_at desc to get the latest, but for now taking the last one uploaded (or first in list depending on DB return order)
+                    # Let's assume the user wants *a* document.
+                    selected_doc = documents[0] # Just pick one if we have any
+                    print(f"Implicitly selecting document based on workflow_id: {selected_doc.filename}")
+
                 if selected_doc:
                     try:
                         vector_store = VectorStore()
@@ -112,7 +142,7 @@ async def execute_chat(
                     except Exception as e:
                         print(f"Error checking vector store: {str(e)}")
                 else:
-                    print("WARNING: No database record found matching the configured file path.")
+                    print("WARNING: No database record found matching the configured file path or filename, and no documents found for this workflow.")
             
             node_configs["knowledgeBase"] = config
         

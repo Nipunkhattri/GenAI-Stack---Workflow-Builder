@@ -76,7 +76,7 @@ export const documentApi = {
     upload: async (formData) => {
         const response = await api.post('/documents/upload', formData, {
             headers: {
-                'Content-Type': 'multipart/form-data',
+                'Content-Type': undefined,
             },
         });
         return response.data;

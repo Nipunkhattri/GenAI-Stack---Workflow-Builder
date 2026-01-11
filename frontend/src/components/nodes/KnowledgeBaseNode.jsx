@@ -45,8 +45,16 @@ function KnowledgeBaseNode({ id, data, selected }) {
             formData.append('embedding_model', embeddingModel);
             formData.append('api_key', apiKey);
 
-            await documentApi.upload(formData);
-            setUploadedFile(file);
+            // Response now includes file_path and collection_name
+            const response = await documentApi.upload(formData);
+
+            // Store the full file details, not just the raw File object
+            setUploadedFile({
+                name: response.filename,
+                path: response.file_path,
+                collection_name: response.collection_name,
+                id: response.id
+            });
 
             toast.loading('Building embeddings...', { id: loadingToast });
             await documentApi.buildEmbeddings({
@@ -114,7 +122,9 @@ function KnowledgeBaseNode({ id, data, selected }) {
                             embedding_provider: getEmbeddingProvider(embeddingModel),
                             embedding_model: embeddingModel,
                             api_key: apiKey,
-                            file: uploadedFile
+                            file: uploadedFile,
+                            file_path: uploadedFile?.path,
+                            collection_name: uploadedFile?.collection_name
                         }
                     }
                 };

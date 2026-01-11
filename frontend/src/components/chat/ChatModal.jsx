@@ -3,22 +3,30 @@ import { X, Send, Bot } from 'lucide-react';
 import { sendMessage, clearMessages } from '../../store/chatSlice';
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useReactFlow } from '@xyflow/react';
 
-function ChatModal({ workflowId, nodes, edges, onClose }) {
+function ChatModal({ workflowId, nodes: propNodes, edges: propEdges, onClose }) {
     const dispatch = useDispatch();
     const { messages, isLoading, sessionId } = useSelector((state) => state.chat);
     const [input, setInput] = useState('');
 
+    // Access internal store to ensure we have the absolute latest data including custom node updates
+    const { getNodes, getEdges } = useReactFlow();
+
     const handleSend = () => {
         if (!input.trim() || isLoading) return;
 
+        // Use internal store nodes if available, otherwise fall back to props
+        const currentNodes = getNodes ? getNodes() : propNodes;
+        const currentEdges = getEdges ? getEdges() : propEdges;
+
         const workflowConfig = {
-            nodes: nodes.map(n => ({
+            nodes: currentNodes.map(n => ({
                 id: n.id,
                 type: n.type,
                 data: n.data
             })),
-            edges: edges.map(e => ({
+            edges: currentEdges.map(e => ({
                 source: e.source,
                 target: e.target,
                 sourceHandle: e.sourceHandle,

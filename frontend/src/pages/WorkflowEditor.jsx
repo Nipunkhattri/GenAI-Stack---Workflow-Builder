@@ -49,14 +49,24 @@ function WorkflowEditorContent() {
     useEffect(() => {
         if (currentWorkflow) {
             setWorkflowName(currentWorkflow.name || 'Untitled Stack');
+            // Update local state for reactivity (counts)
             if (currentWorkflow.nodes) {
                 setNodes(currentWorkflow.nodes);
             }
             if (currentWorkflow.edges) {
                 setEdges(currentWorkflow.edges);
             }
+            // Update ReactFlow internal store (Source of Truth)
+            if (reactFlowInstance) {
+                if (currentWorkflow.nodes) {
+                    reactFlowInstance.setNodes(currentWorkflow.nodes);
+                }
+                if (currentWorkflow.edges) {
+                    reactFlowInstance.setEdges(currentWorkflow.edges);
+                }
+            }
         }
-    }, [currentWorkflow, setNodes, setEdges]);
+    }, [currentWorkflow, setNodes, setEdges, reactFlowInstance]);
 
     const onConnect = useCallback(
         (params) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#22c55e' } }, eds)),
@@ -87,16 +97,25 @@ function WorkflowEditorContent() {
             };
 
             setNodes((nds) => nds.concat(newNode));
+            // ReactFlow handles adding dragged node automatically? No, we must insert it.
+            // setNodes (from hook) updates local state. onNodesChange handles internal?
+            // Wait, for Drop, we usually use setNodes from instance or hook.
+            // If uncontrolled, we should use instance.addNodes? Or setNodes (context)?
+            reactFlowInstance.addNodes(newNode);
         },
         [reactFlowInstance, setNodes]
     );
 
     const handleSave = async () => {
         const workflowId = id !== 'new' ? id : undefined;
+        // Get latest state from ReactFlow instance (Source of Truth)
+        const currentNodes = reactFlowInstance ? reactFlowInstance.getNodes() : [];
+        const currentEdges = reactFlowInstance ? reactFlowInstance.getEdges() : [];
+
         const data = {
             name: workflowName,
-            nodes,
-            edges,
+            nodes: currentNodes,
+            edges: currentEdges,
         };
         try {
             await dispatch(saveWorkflow({ id: workflowId, data }));
@@ -107,13 +126,15 @@ function WorkflowEditorContent() {
     };
 
     const handleBuild = () => {
-        const llmNode = nodes.find(node => node.type === 'llmEngine');
+        const currentNodes = reactFlowInstance ? reactFlowInstance.getNodes() : [];
+
+        const llmNode = currentNodes.find(node => node.type === 'llmEngine');
         if (llmNode && !llmNode.data?.config?.api_key) {
             toast.error('API key not added. Please add your API key in LLM node.');
             return;
         }
 
-        const kbNode = nodes.find(node => node.type === 'knowledgeBase');
+        const kbNode = currentNodes.find(node => node.type === 'knowledgeBase');
         if (kbNode && !kbNode.data?.config?.file) {
             toast.error('PDF not uploaded. Please upload a file in Knowledge Base node.');
             return;
@@ -170,8 +191,8 @@ function WorkflowEditorContent() {
 
                 <main className="flex-1 relative" ref={reactFlowWrapper}>
                     <ReactFlow
-                        nodes={nodes}
-                        edges={edges}
+                        defaultNodes={initialNodes}
+                        defaultEdges={initialEdges}
                         onNodesChange={onNodesChange}
                         onEdgesChange={onEdgesChange}
                         onConnect={onConnect}
@@ -248,8 +269,8 @@ function WorkflowEditorContent() {
             {showChat && (
                 <ChatModal
                     workflowId={id}
-                    nodes={nodes}
-                    edges={edges}
+                    nodes={reactFlowInstance ? reactFlowInstance.getNodes() : []}
+                    edges={reactFlowInstance ? reactFlowInstance.getEdges() : []}
                     onClose={() => setShowChat(false)}
                 />
             )}

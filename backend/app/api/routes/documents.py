@@ -28,6 +28,9 @@ async def upload_document(
     db: AsyncSession = Depends(get_db)
 ):
     """Upload a document for the knowledge base (embeddings will be created on first use)."""
+    print(f"Received upload request for workflow: {workflow_id}")
+    print(f"API Key received (length): {len(api_key) if api_key else 0}")
+    print(f"API Key value (first 5 chars): {api_key[:5] if api_key else 'None'}")
     result = await db.execute(
         select(Workflow).where(Workflow.id == workflow_id)
     )

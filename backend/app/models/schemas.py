@@ -104,6 +104,7 @@ class WorkflowListResponse(BaseModel):
 class DocumentResponse(BaseModel):
     id: UUID
     filename: str
+    file_path: str
     collection_name: str
     chunk_count: str
     created_at: datetime

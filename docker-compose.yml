@@ -19,14 +19,13 @@ services:
 
   backend:
     build: ./backend
+    env_file:
+      - ./backend/.env
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/workflow_db
       - DATABASE_SSL=false
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - SERPAPI_API_KEY=${SERPAPI_API_KEY:-}
-      - PINECONE_API_KEY=${PINECONE_API_KEY:-}
     volumes:
       - uploads_data:/app/uploads
     depends_on:

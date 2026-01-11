@@ -16,11 +16,15 @@ class VectorStore:
         self._pc = None
         self._index_name = settings.pinecone_index_name
         self._api_key = settings.pinecone_api_key
+        print(f"DEBUG: VectorStore init. Pinecone Index: {self._index_name}")
+        print(f"DEBUG: VectorStore init. Pinecone Key Present: {bool(self._api_key)}")
         self._environment = settings.pinecone_environment
         
     def _get_pinecone_client(self):
         """Initialize Pinecone client."""
         if not self._pc:
+            if not self._api_key:
+                print("DEBUG: Pinecone API Key is MISSING in _get_pinecone_client")
             self._pc = Pinecone(api_key=self._api_key)
         return self._pc
     
